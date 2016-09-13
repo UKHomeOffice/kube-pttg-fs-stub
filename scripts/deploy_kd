@@ -57,7 +57,7 @@ export PATH=$PWD:$PATH
 
 kubectl version --client
 
-echo "deploying ...."
+echo "deploying ..."
 export VERSION
 export ENVIRONMENT
 ./kd_linux_amd64 --context=pt-i-dev --namespace=pt-i-dev --file kd/${ENVIRONMENT}/${APP}-deployment.yaml --file kd/${ENVIRONMENT}/${APP}-svc.yaml
