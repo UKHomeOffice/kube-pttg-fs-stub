@@ -6,6 +6,6 @@ export KUBE_SERVER=${KUBE_SERVER_DEV}
 export KUBE_TOKEN=${KUBE_TOKEN}
 
 cd kd
-kd --insecure-skip-tls-verify  \
+kd --insecure-skip-tls-verify --debug \
    --file ${ENVIRONMENT}/pttg-fs-stub-deployment.yaml \
    --file ${ENVIRONMENT}/pttg-fs-stub-svc.yaml
