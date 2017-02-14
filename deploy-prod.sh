@@ -5,6 +5,8 @@ export APP=pttg-fs-stub
 export KUBE_SERVER=${KUBE_SERVER_PROD}
 export KUBE_TOKEN=${KUBE_TOKEN_PROD}
 
+echo ${KUBE_SERVER_DEV}
+
 if [ -z ${KUBE_TOKEN_PROD+x} ]
 then
     echo "KUBE_TOKEN_PROD must be set"
