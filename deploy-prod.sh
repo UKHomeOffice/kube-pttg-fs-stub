@@ -14,6 +14,6 @@ fi
 
 cd kd
 kd --debug \
-   --insecure-skip-tls-verify --timeout 5m0s \
+   --timeout 5m0s \
    --file ${ENVIRONMENT}/pttg-fs-stub-deployment.yaml \
    --file ${ENVIRONMENT}/pttg-fs-stub-svc.yaml
