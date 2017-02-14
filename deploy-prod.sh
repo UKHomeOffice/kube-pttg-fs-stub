@@ -2,7 +2,7 @@
 export KUBE_NAMESPACE=${KUBE_NAMESPACE}
 export ENVIRONMENT=${ENVIRONMENT}
 export APP=pttg-fs-stub
-export KUBE_SERVER=${KUBE_SERVER_DEV}
+export KUBE_SERVER=${KUBE_SERVER_PROD}
 export KUBE_TOKEN=${KUBE_TOKEN_PROD}
 
 if [ -z ${KUBE_TOKEN_PROD+x} ]
@@ -14,6 +14,6 @@ fi
 
 cd kd
 kd --debug \
-   --timeout 5m0s \
+   --insecure-skip-tls-verify --timeout 5m0s \
    --file ${ENVIRONMENT}/pttg-fs-stub-deployment.yaml \
    --file ${ENVIRONMENT}/pttg-fs-stub-svc.yaml
