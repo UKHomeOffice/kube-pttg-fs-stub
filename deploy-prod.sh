@@ -5,7 +5,15 @@ export APP=pttg-fs-stub
 export KUBE_SERVER=${KUBE_SERVER_DEV}
 export KUBE_TOKEN=${KUBE_TOKEN_PROD}
 
+if [ -z ${KUBE_TOKEN_PROD+x} ]
+then
+    echo "KUBE_TOKEN_PROD must be set"
+else
+    echo "KUBE_TOKEN_PROD is set"
+fi
+
 cd kd
-kd --insecure-skip-tls-verify --timeout 5m0s \
+kd --debug \
+   --insecure-skip-tls-verify --timeout 5m0s \
    --file ${ENVIRONMENT}/pttg-fs-stub-deployment.yaml \
    --file ${ENVIRONMENT}/pttg-fs-stub-svc.yaml
