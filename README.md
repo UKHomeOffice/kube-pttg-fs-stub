@@ -4,6 +4,3 @@
 
 This is the kubernetes deployment files for Proving Things Financial Status Barclays Stub
 
-run deployment
-
-	./scripts/deploy_kd

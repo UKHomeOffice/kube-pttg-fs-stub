@@ -4,19 +4,25 @@ kind: Deployment
 metadata:
   name: pttg-fs-stub
   labels:
-    name: pttg-fs-stub
     version: {{.VERSION}}
 spec:
   replicas: 2
   selector:
     matchLabels:
       name: pttg-fs-stub
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 2
+    type: RollingUpdate
   template:
     metadata:
       labels:
         name: pttg-fs-stub
         version: {{.VERSION}}
     spec:
+      imagePullSecrets:
+      - name: registrykey
       containers:
       - name: vault-sidekick
         image: quay.io/ukhomeofficedigital/vault-sidekick:v0.2.0
@@ -50,6 +56,13 @@ spec:
       - name: proxy
         image: quay.io/ukhomeofficedigital/nginx-proxy:v1.5.1
         imagePullPolicy: Always
+        resources:
+         limits:
+          memory: "100Mi"
+          cpu: 100m
+         requests:
+          memory: "50Mi"
+          cpu: 100m
         env:
           - name: PROXY_SERVICE_HOST
             value: '127.0.0.1'
@@ -77,18 +90,18 @@ spec:
       - name: pttg-fs-stub
         image: quay.io/ukhomeofficedigital/pttg-fs-stub:{{.VERSION}}
         env:
-          - name: MONGODB_SERVICE
-            value: 'pttg-mongodb.pt-i-{{.ENVIRONMENT}}.svc.cluster.local'
+          - name: JAVA_OPTS
+            value: "-Xms150m -Xmx250m"
           - name: SERVER_PORT
             value: '8080'
-          - name: JAVA_OPTS
-            value: "-Xms512m -Xmx768m"
+          - name: MONGODB_SERVICE
+            value: 'pttg-mongodb'
         resources:
           limits:
-            cpu: 200m
+            cpu: 300m
             memory: 1024Mi
           requests:
-            cpu: 100m
+            cpu: 200m
             memory: 512Mi
         ports:
           - name: http
@@ -103,6 +116,15 @@ spec:
           initialDelaySeconds: 240
           periodSeconds: 20
           timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+            httpHeaders:
+              - name: X-probe
+                value: kubelet
+          periodSeconds: 20
+          timeoutSeconds: 5
         imagePullPolicy: Always
       volumes:
       - name: secrets
