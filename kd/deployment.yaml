@@ -24,38 +24,39 @@ spec:
       imagePullSecrets:
       - name: registrykey
       containers:
-      - name: vault-sidekick
-        image: quay.io/ukhomeofficedigital/vault-sidekick:v0.2.0
-        imagePullPolicy: Always
-        resources:
-         limits:
-          memory: "100Mi"
-          cpu: 100m
-         requests:
-          memory: "50Mi"
-          cpu: 100m
+      - name: certs
+        image: quay.io/ukhomeofficedigital/pttg-cfssl-sidekick:build-6
+        securityContext:
+          runAsNonRoot: true
+          capabilities:
+            drop:
+             - SETUID
+             - SETGID
         args:
-          - -output=/etc/nginx/secrets
-          - -tls-skip-verify=true
-          - -cn=pki:services/${NAMESPACE}/pki/issue/default:common_name=pttg-fs-stub.${NAMESPACE}.svc.cluster.local,file=/etc/nginx/secrets/pttg-fs-stub,fmt=bundle
+          - --certs=/certs
+          - --domain=pttg-fs-stub.${KUBE_NAMESPACE}.svc.cluster.local
+          - --expiry=8760h
+          - --command=/usr/local/scripts/trigger_nginx_reload.sh
         env:
-          - name: VAULT_ADDR
-            value: "https://vault.vault.svc.cluster.local:8200"
-          - name: NAMESPACE
+          - name: KUBE_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: VAULT_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: store-token
-                key: token
         volumeMounts:
-          - mountPath: /etc/nginx/secrets
-            name: secrets
+          - name: certs
+            mountPath: /certs
+          - name: bundle
+            mountPath: /etc/ssl/certs
+            readOnly: true
       - name: proxy
-        image: quay.io/ukhomeofficedigital/nginx-proxy:v1.5.1
+        image: quay.io/ukhomeofficedigital/nginx-proxy:v3.2.6
         imagePullPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+          capabilities:
+            drop:
+             - SETUID
+             - SETGID
         resources:
          limits:
           memory: "100Mi"
@@ -75,12 +76,14 @@ spec:
           - name: HTTPS_REDIRECT
             value: 'FALSE'
           - name: SERVER_CERT
-            value: /etc/nginx/secrets/pttg-fs-stub-bundle.pem
+            value: /certs/tls.pem
           - name: SERVER_KEY
-            value: /etc/nginx/secrets/pttg-fs-stub-key.pem
+            value: /certs/tls-key.pem
+          - name: ADD_NGINX_SERVER_CFG
+            value: 'gzip off; location = /reload { allow 127.0.0.1; deny all; content_by_lua_block { os.execute("touch /tmp/nginx-reload-triggered; /usr/local/openresty/nginx/sbin/nginx -s reload; touch /tmp/nginx-reload-complete;") } }'
         volumeMounts:
-          - name: secrets
-            mountPath: /etc/nginx/secrets
+          - name: certs
+            mountPath: /certs
             readOnly: true
         ports:
           - name: https
@@ -127,6 +130,12 @@ spec:
           timeoutSeconds: 5
         imagePullPolicy: Always
       volumes:
-      - name: secrets
+      - name: store
         emptyDir:
           medium: "Memory"
+      - name: certs
+        emptyDir:
+          medium: "Memory"
+      - name: bundle
+        configMap:
+          name: bundle

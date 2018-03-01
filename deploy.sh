@@ -1,9 +1,10 @@
-#!/usr/bin/env bash
-export KUBE_NAMESPACE=${KUBE_NAMESPACE:-${DRONE_DEPLOY_TO}}
-export KUBE_SERVER=${KUBE_SERVER_DEV}
+#!/bin/bash
+
+export KUBE_NAMESPACE=${KUBE_NAMESPACE}
+export KUBE_SERVER=${KUBE_SERVER}
+export KUBE_TOKEN=${KUBE_TOKEN}
 
 cd kd
 kd --insecure-skip-tls-verify \
-   --file deployment.yaml \
-   --file service.yaml \
-   --retries 50
+   -f deployment.yaml \
+   -f service.yaml
