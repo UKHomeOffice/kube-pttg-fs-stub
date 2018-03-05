@@ -92,6 +92,13 @@ spec:
             containerPort: 80
       - name: pttg-fs-stub
         image: quay.io/ukhomeofficedigital/pttg-fs-stub:{{.VERSION}}
+        imagePullPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+          capabilities:
+            drop:
+             - SETUID
+             - SETGID
         env:
           - name: JAVA_OPTS
             value: "-Xms150m -Xmx250m"
@@ -128,7 +135,6 @@ spec:
                 value: kubelet
           periodSeconds: 20
           timeoutSeconds: 5
-        imagePullPolicy: Always
       volumes:
       - name: store
         emptyDir:
