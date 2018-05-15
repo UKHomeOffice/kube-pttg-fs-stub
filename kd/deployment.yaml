@@ -6,7 +6,7 @@ metadata:
   labels:
     version: {{.VERSION}}
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       name: pttg-fs-stub
@@ -87,7 +87,7 @@ spec:
             readOnly: true
         ports:
           - name: https
-            containerPort: 443
+            containerPort: 10443
           - name: http
             containerPort: 80
       - name: pttg-fs-stub
