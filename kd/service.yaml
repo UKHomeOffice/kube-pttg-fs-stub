@@ -11,6 +11,6 @@ spec:
     port: 80
   - name: https
     port: 443
-    targetPort: https
+    targetPort: 10443
   selector:
     name: pttg-fs-stub
